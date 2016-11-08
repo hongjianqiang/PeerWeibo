@@ -3,15 +3,25 @@ var bindings = require('./build/Release/supercop.node');
 
 if ('x32' == o.arch()) {
   if ('Windows_NT' == o.type()) {
-    
-  }
 
-} else if ('x64' == o.arch()) {
+  }
+}
+
+if ('x64' == o.arch()) {
   if ('Windows_NT' == o.type()) {
+    // Windows 10 下编译通过的模块
     bindings = require('./dist/supercop_win.node');
-    console.log('./dist/supercop_win.node');
   }
+  if ('Linux' == o.type()) {
+    // Ubuntu 16.04 下编译通过的模块
+    bindings = require('./dist/supercop_linux.node');
+  }
+}
 
+if ('arm' == o.arch()) {
+  if ('Linux' == o.type()) {
+    // Raspberry Pi 下编译通过的模块
+  }
 }
 
 // var bindings = require('./build/Release/supercop.node')
