@@ -12,39 +12,42 @@ app.get('/', function (req, res) {
 io.sockets.on('connection', function (socket) {
   socket.emit('conn', { connect: true });
 
-  socket.on('ed25519', function (data) {
+  socket.on('createSeed', function (data) {
     var req = JSON.parse(data);
+    var seed = ed.createSeed();
 
-    var ActionLists = {
-      'createSeed': function(req) {
-        var seed = ed.createSeed();
+    emit('createSeed', seed);
+    console.log('\ncreateSeed():'); console.log(seed);
+  });
 
-        emit('ed25519', seed);
+  socket.on('createKeyPair', function (data) {
+    var req = JSON.parse(data);
+    var keypair = ed.createKeyPair(Buffer(req));
 
-        console.log('\ncreateSeed():'); console.log(seed);
-      },
-      'createKeyPair': function(req) {
-        var keypair = ed.createKeyPair(Buffer(req.seed));
+    emit('createKeyPair', keypair);
+    console.log('\ncreateKeyPair():'); console.log(keypair);
+  });
 
-        emit('ed25519', keypair);
+  socket.on('sign', function (data) {
+    var req = JSON.parse(data);
+    var message = req.message;
+    var publicKey = Buffer(req.publicKey);
+    var secretKey = Buffer(req.secretKey);
+    var signature = ed.sign(message, publicKey, secretKey);
 
-        console.log('\ncreateKeyPair():'); console.log(keypair);
-      },
-      'sign': function(req) {
-        var message = req.message;
-        var publicKey = Buffer(req.publicKey);
-        var secretKey = Buffer(req.secretKey);
-        var signature = ed.sign(message, publicKey, secretKey);
+    emit('sign', signature);
+    console.log('\nsign():'); console.log(signature);
+  });
 
-        emit('ed25519', signature);
+  socket.on('verify', function (data) {
+    var req = JSON.parse(data);
+    var signature = Buffer(req.signature);
+    var message = req.message;
+    var publicKey = Buffer(req.publicKey);
+    var ok = ed.verify(signature, message, publicKey);
 
-        console.log('\nsign():'); console.log(signature);
-      }
-    };
-
-    var ActionName = req.Action;
-    var Do = ActionLists[ActionName];
-    if (isFunc(Do)) { Do(req); }
+    emit('verify', ok);
+    console.log('\nverify():'); console.log(ok);
   });
 
   function emit(e, resp) {

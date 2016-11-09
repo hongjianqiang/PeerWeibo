@@ -1,30 +1,41 @@
 var o = require('os');
-var bindings = require('./build/Release/supercop.node');
+var bindings;
 
-if ('x32' == o.arch()) {
-  if ('Windows_NT' == o.type()) {
+switch (o.arch()) {
+  case 'x32':
+    if ('Windows_NT' == o.type()) {
 
-  }
+    } else {
+      bindings = require('./build/Release/supercop.node');
+    }
+    break;
+
+  case 'x64':
+    if ('Windows_NT' == o.type()) {
+      // Windows 10 下编译通过的模块
+      bindings = require('./dist/supercop_win.node');
+    } else if ('Linux' == o.type()) {
+      // Ubuntu 16.04 下编译通过的模块
+      bindings = require('./dist/supercop_linux.node');
+    } else {
+      bindings = require('./build/Release/supercop.node');
+    }
+    break;
+
+  case 'arm':
+    if ('Linux' == o.type()) {
+      // Raspberry Pi 下编译通过的模块
+    } else {
+      bindings = require('./build/Release/supercop.node');
+    }
+    break;
+
+  default:
+    bindings = require('./build/Release/supercop.node');
+    break;
 }
 
-if ('x64' == o.arch()) {
-  if ('Windows_NT' == o.type()) {
-    // Windows 10 下编译通过的模块
-    bindings = require('./dist/supercop_win.node');
-  }
-  if ('Linux' == o.type()) {
-    // Ubuntu 16.04 下编译通过的模块
-    bindings = require('./dist/supercop_linux.node');
-  }
-}
-
-if ('arm' == o.arch()) {
-  if ('Linux' == o.type()) {
-    // Raspberry Pi 下编译通过的模块
-  }
-}
-
-// var bindings = require('./build/Release/supercop.node')
+// var bindings = require('./build/Release/supercop.node');
 
 exports.sign = function (message, publicKey, secretKey) {
   if (typeof message === 'string') message = Buffer(message)
