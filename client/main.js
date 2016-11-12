@@ -8,6 +8,7 @@ import Buttons from './css/buttons.css'
 
 import Vue from 'vue/dist/vue.js'
 import Router from 'vue-router'
+
 import App from './App.vue'
 import LoginView from './components/LoginView.vue'
 
@@ -27,7 +28,12 @@ const router = new Router({
   ]
 });
 
+let Data = {
+  cfg: 'config'
+};
+
 new Vue({
-  components: {'app': App},
+  data: Data,
+  components: { 'app': App },
   router
 }).$mount('app');

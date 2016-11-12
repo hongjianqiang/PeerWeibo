@@ -8,7 +8,7 @@
             <div class="row"><h4>请把密钥文件拖放到虚线框内</h4></div>
             <div class="row">
               <div class="nine columns">
-                <input type="password" class="u-full-width" placeholder="密码">
+                <input type="password" class="u-full-width" placeholder="密码" style="cursor: not-allowed; background: #c0c0c0; opacity: 1;" disabled>
               </div>
               <div class="three columns">
                 <a class="button button-primary u-full-width" style="padding:0;">登录</a>
@@ -22,7 +22,7 @@
             </div>
           </div>
         </div>
-        <div class="row front-style front-signup" v-bind:class="{ hide: isHide }">
+        <div class="row front-style front-signup" v-bind:class="{ hide: !isSignup }">
           <h2>新来 PeerWeibo? 注册</h2>
           <form>
             <div class="row">
@@ -33,7 +33,7 @@
             </div>
             <div class="row">
               <div class="nine columns">
-                <input v-model="password" type="password" class="u-full-width" placeholder="密码">
+                <input v-model="password" type="password" class="u-full-width" placeholder="密码" style="cursor: not-allowed; background: #c0c0c0; opacity: 1;" disabled>
               </div>
               <div class="three columns">
                 <a v-on:click="register" class="button button-highlight u-full-width">注册</a>
@@ -41,7 +41,7 @@
             </div>            
           </form>
         </div>
-        <div class="row front-style saveKeypair" v-bind:class="{ hide: !isHide }">
+        <div class="row front-style saveKeypair" v-bind:class="{ hide: (isSignup || isWait) }">
           <h2>密钥文件即登陆凭证，请保存到安全的位置</h2>
           <div class="row">
             <a class="button button-caution u-full-width" 
@@ -49,6 +49,12 @@
               v-bind:download="keyPairFileName">
               保存密钥文件到本地磁盘
             </a>
+          </div>
+        </div>
+        <div class="row front-style waiting" v-bind:class="{ hide: !isWait }">
+          <h2>正在注册到 Bittorrent 网络，请稍后...</h2>
+          <div class="row">
+            <i class="fa fa-spinner fa-spin spinner-icon"></i>
           </div>
         </div>
       </div>
@@ -71,13 +77,17 @@
   let socket = Socket.connect('ws://localhost:3000');
 
   let Data = {
-    isHide: false,
-    fullName: "",
-    email: "",
-    password: "",
-    keyPairFileData: "data:text/txt;charset=utf-8,",
-    keyPairFileName: ".txt"
+    dht: '',
+    isSignup: true,
+    isWait: false,
+    fullName: '',
+    email: '',
+    password: '',
+    keyPairFileData: 'data:text/txt;charset=utf-8,',
+    keyPairFileName: '.txt',
   };
+
+  let root;
 
   module.exports = {
     data: function () {
@@ -86,11 +96,14 @@
     mounted: function () {
       this.handleDragDropInit();
       this.handleDropbox();
+      //this.$root.cfg = 'LoginView.vue mounted';
+      root = this.$root;
     },
     methods: {
       register: function (event) {
         emit('createSeed');
-        this.isHide = true;
+        this.isSignup = false;
+        this.isWait = true;
       },
       handleDragDropInit: function () {
         document.addEventListener('dragleave', function(e) {
@@ -124,7 +137,15 @@
           let reader = new FileReader();
           reader.onload = function(e) {
             let text = reader.result;
-            console.log(text);
+            
+            root.cfg = text;
+
+            //root.cfg = JSON.parse(text);
+            //root.cfg = 'fuck';
+            //console.log(root.cfg);
+
+            dropbox.style.borderColor = '';  
+            dropbox.style.backgroundColor = '';   
           };
 
           reader.readAsText(fileList[0]);
@@ -138,14 +159,17 @@
         });
       }
     }
-  }
+  };
 
   let seed, keypair, random = Math.random().toString();
 
-  socket.on('verify', function (data) {
-    let ok = JSON.parse(data);
+  socket.on('getMutableContentHash', function (data) {
+    let hash = JSON.parse(data);
     
-    if (ok) {
+    if (hash) {
+      Data.isSignup = false;
+      Data.isWait = false;
+
       let d = {};
 
       d.fullName = Data.fullName;
@@ -154,12 +178,42 @@
       d.seed = seed;
       d.publicKey = keypair.publicKey;
       d.secretKey = keypair.secretKey;
+      d.uid = hash.data;
+      d.dht = Data.dht;
 
       Data.keyPairFileName = Data.fullName + '_' + Data.email + '_' + new Date().Format("yyyyMMdd") + '.json';
       Data.keyPairFileData = Data.keyPairFileData + JSON.stringify(d);
 
-      console.log(seed);
-      console.log(keypair);
+    } else {
+      setTimeout(function () {
+        let req = {};
+
+        req.publicKey = keypair.publicKey;
+        req.secretKey = keypair.secretKey;
+        
+        emit('getMutableContentHash', req);
+      }, 10*1000);
+    }
+
+    console.log(hash);
+  });
+
+  socket.on('dht', function (data) {
+    console.log(data);
+    Data.dht = data;
+
+  });
+
+  socket.on('verify', function (data) {
+    let ok = JSON.parse(data);
+    
+    if (ok) {
+      let req = {};
+      
+      req.publicKey = keypair.publicKey;
+      req.secretKey = keypair.secretKey;
+
+      emit('getMutableContentHash', req);
     }
 
   });
@@ -194,26 +248,6 @@
 
     emit('createKeyPair', seed);
   });
-
-/*
-  let dropbox = document.getElementById('keyPairFile');
-  console.log(dropbox);
-
-  dropbox.addEventListener("dragenter", function(e){  
-    e.stopPropagation();  
-    e.preventDefault();  
-    dropbox.style.borderColor = 'gray';  
-    dropbox.style.backgroundColor = 'white';  
-  }, false);  
-*/
-  //dropZone.addEventListener('dragenter', handleFileSelect, false);
-
-  function handleFileSelect(evt) {
-    evt.stopPropagation();
-    evt.preventDefault();
-
-    let files = evt.dataTransfer.files;
-  }
 
   function seedArray(sha256){
     let arr = sha256.split('');
@@ -311,5 +345,13 @@
 
   .about {
     padding: 12px;
+  }
+
+  .waiting div {
+    text-align: center; 
+    padding-bottom:15px;
+  }
+  .waiting .spinner-icon {
+    font-size: 100px;
   }
 </style>
