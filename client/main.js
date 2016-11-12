@@ -10,26 +10,23 @@ import Vue from 'vue/dist/vue.js'
 import Router from 'vue-router'
 
 import App from './App.vue'
+import HomeView from './components/HomeView.vue'
 import LoginView from './components/LoginView.vue'
 
 Vue.use(Router);
-
-const Home = { template: '<div>home</div>' };
-const Foo = { template: '<div>foo</div>' };
-const Bar = { template: '<div>bar</div>' };
 
 const router = new Router({
   mode: 'hash',
   base: __dirname,
   routes: [
-    { path: '/', component: LoginView }, // all paths are defined without the hash.
-    { path: '/foo', component: Foo },
-    { path: '/bar', component: Bar }
+    { path: '/', component: HomeView },
+    { path: '/Home', component: HomeView },
+    { path: '/Login', component: LoginView }
   ]
 });
 
 let Data = {
-  cfg: 'config'
+  cfg: {}
 };
 
 new Vue({

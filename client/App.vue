@@ -6,8 +6,6 @@
       <!-- <router-link> will be rendered as an `<a>` tag by default -->
       <router-link to="/foo">Go to Foo</router-link>
       <router-link to="/bar">Go to Bar</router-link>
-      <input v-model="this.$root.cfg">
-      <div v-bind:text-content.prop="this.$root.cfg"></div>
     </p>
     <!-- route outlet -->
     <!-- component matched by the route will render here -->
@@ -16,6 +14,14 @@
 </template>
 
 <style>
+body {
+  background: url(./images/login_bg.jpg);
+  background-size: 100%;
+  background-repeat: no-repeat;
+}
+
+.container { width: 95%; max-width: 95%; }
+
 #wrapper {
   color: white;
   font-family: 雅黑;
@@ -42,7 +48,7 @@
 <script>
   let Data = {
   };
-  
+
   module.exports = {
     data: function () {
       return Data;
