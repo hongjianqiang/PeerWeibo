@@ -15,7 +15,7 @@
 
 <style>
 body {
-  background: url(./images/login_bg.jpg);
+  background: url(./images/login_bg.jpg) fixed;
   background-size: 100%;
   background-repeat: no-repeat;
 }
@@ -36,6 +36,10 @@ body {
   -webkit-transform: translateX(-50%) translateY(-50%);
 }
 
+.fixed {
+  position: fixed;
+}
+
 .button {
   padding: 0;
 }
@@ -43,6 +47,7 @@ body {
 .hide {
   display: none;
 }
+
 </style>
 
 <script>
