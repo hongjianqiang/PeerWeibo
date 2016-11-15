@@ -12,6 +12,7 @@ import Router from 'vue-router'
 import App from './App.vue'
 import HomeView from './components/HomeView.vue'
 import LoginView from './components/LoginView.vue'
+import UserView from './components/UserView.vue'
 
 Vue.use(Router);
 
@@ -21,7 +22,8 @@ const router = new Router({
   routes: [
     { path: '/', component: HomeView },
     { path: '/Home', component: HomeView },
-    { path: '/Login', component: LoginView }
+    { path: '/Login', component: LoginView },
+    { path: '/User', component: UserView }
   ]
 });
 

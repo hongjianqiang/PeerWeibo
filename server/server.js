@@ -65,23 +65,7 @@ io.sockets.on('connection', function (socket) {
     var keypair = {};
     var opts = {};
 
-    /*
-    var now = moment().format('YYYYMMDDHHmmss');
-    var nowInt = parseInt(now, 10);
-
-    var value = {
-      type: 'weibo',
-      name: req.fullName,
-      content: '大家好，这是我的第一条微博。',
-      date: now,
-      prevHash: ''
-    };
-
-    var text = JSON.stringify(value);
-
-    // var text = new Buffer( JSON.stringify(value) );
-    // var text = new Buffer(200).fill('whatever'); // the payload you want to send
-    */
+    var value = new Buffer('signup');
 
     keypair.publicKey = Buffer(req.publicKey);
     keypair.secretKey = Buffer(req.secretKey);
@@ -89,24 +73,24 @@ io.sockets.on('connection', function (socket) {
     opts = {
       k: keypair.publicKey,
       seq: 0,
-      v: 'signup',
+      v: value,
       sign: function (buf) {
         return ed.sign(buf, keypair.publicKey, keypair.secretKey);
       }
     };
-    
+
     console.log('\ngetMutableContentHash:');
 
     dht.put(opts, function (err, hash) {
       if ( err != null ) {
         console.error('error=', err);
         emit('getMutableContentHash', false, socket);
-  
+
       } else {
         console.log('hash=', hash);
         emit('getMutableContentHash', hash, socket);
-        
-      }     
+
+      }
     });
   });
 
