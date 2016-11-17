@@ -23,7 +23,7 @@ const router = new Router({
     { path: '/', component: HomeView },
     { path: '/Home', component: HomeView },
     { path: '/Login', component: LoginView },
-    { path: '/User', component: UserView }
+    { path: '/User/:id', component: UserView }
   ]
 });
 

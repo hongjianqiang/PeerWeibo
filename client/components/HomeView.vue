@@ -180,7 +180,7 @@
             <div class="face"></div>
           </div>
           <div class="row nameBox">
-            <span class="bold">洪建强</span>
+            <router-link to="/User/60d7fa031b31f83cfac7c7f0eff7fef744b92731">洪建强</router-link>
           </div>
           <div class="row detail">
             <div class="four columns">
